@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GD video player by subhra prakash</title>
+  <title>Google Drive Video Player</title>
   <style>
     * {
       box-sizing: border-box;
@@ -58,6 +58,10 @@
       color: #555;
       display: none;
     }
+    #fullscreenBtn {
+      display: none;
+      margin-top: 10px;
+    }
 
     @media (max-width: 600px) {
       iframe {
@@ -78,6 +82,8 @@
 
   <div id="loader">Loading video...</div>
   <iframe id="videoFrame" allow="autoplay"></iframe>
+  <br />
+  <button id="fullscreenBtn" onclick="makeFullscreen()">Fullscreen</button>
 
   <script>
     function extractFileId(url) {
@@ -99,7 +105,6 @@
         window.history.pushState({}, "", newUrl);
       }
 
-      // Hide input, show loader
       document.getElementById("inputSection").style.display = "none";
       document.getElementById("loader").style.display = "block";
 
@@ -107,14 +112,24 @@
       const iframe = document.getElementById("videoFrame");
       iframe.src = embedUrl;
 
-      // Wait until video is loaded
       iframe.onload = function () {
         document.getElementById("loader").style.display = "none";
         iframe.style.display = "block";
+        document.getElementById("fullscreenBtn").style.display = "inline-block";
       };
     }
 
-    // Auto-load video if URL has ?video=ID
+    function makeFullscreen() {
+      const iframe = document.getElementById("videoFrame");
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.webkitRequestFullscreen) { // Safari
+        iframe.webkitRequestFullscreen();
+      } else if (iframe.msRequestFullscreen) { // IE11
+        iframe.msRequestFullscreen();
+      }
+    }
+
     window.onload = function () {
       const params = new URLSearchParams(window.location.search);
       const videoId = params.get("video");
