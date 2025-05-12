@@ -1,36 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Google Drive Video Player</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GD video player by subhra prakash</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
+      margin: 0;
       padding: 20px;
       text-align: center;
       background: #f4f4f4;
+    }
+    h2 {
+      margin-bottom: 20px;
     }
     #inputSection {
       margin-bottom: 20px;
     }
     input[type="text"] {
-      width: 80%;
-      padding: 10px;
+      width: 90%;
+      max-width: 600px;
+      padding: 12px;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
     button {
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 16px;
       margin-top: 10px;
       cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     iframe {
       margin-top: 20px;
       width: 100%;
-      max-width: 640px;
-      height: 360px;
+      max-width: 800px;
+      height: 45vw;
+      max-height: 450px;
       border: none;
+      border-radius: 8px;
+      display: none;
+    }
+    #loader {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #555;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      iframe {
+        height: 200px;
+      }
     }
   </style>
 </head>
@@ -39,12 +71,13 @@
   <h2>Google Drive Video Player</h2>
 
   <div id="inputSection">
-    <input type="text" id="driveLink" placeholder="Paste Google Drive video link here">
-    <br>
+    <input type="text" id="driveLink" placeholder="Paste Google Drive video link here" />
+    <br />
     <button onclick="loadVideo()">Submit</button>
   </div>
 
-  <div id="videoContainer"></div>
+  <div id="loader">Loading video...</div>
+  <iframe id="videoFrame" allow="autoplay"></iframe>
 
   <script>
     function extractFileId(url) {
@@ -56,31 +89,35 @@
       let id = fileId;
 
       if (!id) {
-        const inputLink = document.getElementById('driveLink').value.trim();
+        const inputLink = document.getElementById("driveLink").value.trim();
         id = extractFileId(inputLink);
         if (!id) {
-          alert('Invalid Google Drive link!');
+          alert("Invalid Google Drive link!");
           return;
         }
-        // Update URL with video query param
         const newUrl = `${window.location.pathname}?video=${id}`;
-        window.history.pushState({}, '', newUrl);
+        window.history.pushState({}, "", newUrl);
       }
 
-      // Hide input form
-      const inputSection = document.getElementById('inputSection');
-      if (inputSection) inputSection.style.display = 'none';
+      // Hide input, show loader
+      document.getElementById("inputSection").style.display = "none";
+      document.getElementById("loader").style.display = "block";
 
-      // Show video
       const embedUrl = `https://drive.google.com/file/d/${id}/preview`;
-      const iframe = `<iframe src="${embedUrl}" allow="autoplay"></iframe>`;
-      document.getElementById('videoContainer').innerHTML = iframe;
+      const iframe = document.getElementById("videoFrame");
+      iframe.src = embedUrl;
+
+      // Wait until video is loaded
+      iframe.onload = function () {
+        document.getElementById("loader").style.display = "none";
+        iframe.style.display = "block";
+      };
     }
 
-    // Auto-load video if ?video=FILE_ID is in URL
+    // Auto-load video if URL has ?video=ID
     window.onload = function () {
       const params = new URLSearchParams(window.location.search);
-      const videoId = params.get('video');
+      const videoId = params.get("video");
       if (videoId) {
         loadVideo(videoId);
       }
