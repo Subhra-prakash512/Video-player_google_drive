@@ -1,1 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google Drive Video Player</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+      background: #f4f4f4;
+    }
+    #inputSection {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    iframe {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 640px;
+      height: 360px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
 
+  <h2>Google Drive Video Player</h2>
+
+  <div id="inputSection">
+    <input type="text" id="driveLink" placeholder="Paste Google Drive video link here">
+    <br>
+    <button onclick="loadVideo()">Submit</button>
+  </div>
+
+  <div id="videoContainer"></div>
+
+  <script>
+    function extractFileId(url) {
+      const match = url.match(/[-\w]{25,}/);
+      return match ? match[0] : null;
+    }
+
+    function loadVideo(fileId = null) {
+      let id = fileId;
+
+      if (!id) {
+        const inputLink = document.getElementById('driveLink').value.trim();
+        id = extractFileId(inputLink);
+        if (!id) {
+          alert('Invalid Google Drive link!');
+          return;
+        }
+        // Update URL with video query param
+        const newUrl = `${window.location.pathname}?video=${id}`;
+        window.history.pushState({}, '', newUrl);
+      }
+
+      // Hide input form
+      const inputSection = document.getElementById('inputSection');
+      if (inputSection) inputSection.style.display = 'none';
+
+      // Show video
+      const embedUrl = `https://drive.google.com/file/d/${id}/preview`;
+      const iframe = `<iframe src="${embedUrl}" allow="autoplay"></iframe>`;
+      document.getElementById('videoContainer').innerHTML = iframe;
+    }
+
+    // Auto-load video if ?video=FILE_ID is in URL
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      const videoId = params.get('video');
+      if (videoId) {
+        loadVideo(videoId);
+      }
+    };
+  </script>
+
+</body>
+</html>
